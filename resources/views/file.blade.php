@@ -14,17 +14,17 @@
 						<thead>
 							<th>#</th>
 							<th>file name</th>
-							<th>ext</th>
 							<th>size</th>
+							<th></th>
 						</thead>
-						{{--@foreach($files as $file)--}}
-							{{--<tr>--}}
-								{{--<td></td>--}}
-								{{--<td></td>--}}
-								{{--<td></td>--}}
-								{{--<td></td>--}}
-							{{--</tr>--}}
-						{{--@endforeach--}}
+						@foreach($files as $key => $file)
+							<tr>
+								<td>{{ $key }}</td>
+								<td>{{ $file['name'] . $file['ext'] }}</td>
+								<td>{{ $file['size'] }}</td>
+								<td></td>
+							</tr>
+						@endforeach
 					</table>
 				</div>
 			</div>
