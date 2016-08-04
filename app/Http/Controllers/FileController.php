@@ -4,6 +4,7 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class FileController extends Controller {
 
@@ -67,15 +68,42 @@ class FileController extends Controller {
 		}
 	}
 
-	public function make_dir($dirname, $mode = 0777)
+	/**
+	 * make new folder
+	 * @param Requests\MakeFolderRequest $request
+	 * @return \Illuminate\Http\RedirectResponse
+	 */
+	public function make_dir(Requests\MakeFolderRequest $request)
 	{
-		return mkdir($dirname.$this->dir, $mode);
+		$input = $request->all();
+		if (!is_dir($input['folderName']))
+		{
+			mkdir($this->dir.$input['folderName'], $mode = 0777);
+		}
+		return redirect()->back();
 	}
-	
-//	public function delete_file($file)
-//	{
-//		unlink($file);
-//	}
+
+	/**
+	 * delete file
+	 * @param Request $request
+	 * @return \Illuminate\Http\RedirectResponse
+	 */
+	public function delete_file(Request $request)
+	{
+		$input = $request->all();
+		$file = $this->dir.$input['fileName'];
+		if (is_dir($file))
+		{
+			rmdir($file);
+		} else {
+			if (file_exists($file))
+			{
+				unlink($file);
+			}
+		}
+
+		return redirect()->back();
+	}
 
 	/**
 	 * show size better
