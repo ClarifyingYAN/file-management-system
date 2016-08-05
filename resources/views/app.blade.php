@@ -38,7 +38,7 @@
 				<ul class="nav navbar-nav">
 					<li><a href="{{ url('/') }}">Home</a></li>
 					<li><a href="{{ url('/file') }}">Files</a></li>
-					<li><a href="{{ url('/settings') }}">Settings</a></li>
+					<li><a href="{{ url('/setting') }}">Settings</a></li>
 				</ul>
 
 				<ul class="nav navbar-nav navbar-right">
