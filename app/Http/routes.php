@@ -19,7 +19,7 @@ Route::get('file', 'FileController@index');
 Route::get('setting', 'SettingsController@index');
 Route::post('file', 'FileController@make_dir');
 Route::post('/file/del', 'FileController@delete_file');
-
+Route::post('/file/upload', 'FileController@upload');
 
 Route::controllers([
 	'auth' => 'Auth\AuthController',

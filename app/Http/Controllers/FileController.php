@@ -2,13 +2,14 @@
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
 
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class FileController extends Controller {
 
-	protected $dir = 'E:/wamp64/www/file-management-system/management/';
+	protected $disk = '';
 	protected $files = [];
 	protected $name = [];
 	protected $size = [];
@@ -18,10 +19,14 @@ class FileController extends Controller {
 	protected $dirkFreeSize = 0;
 	protected $fileNum = 0;
 
-//	public function __construct($dir)
-//	{
-//		$this->dir = Config::get();
-//	}
+	/**
+	 * FileController constructor.
+	 * initial disk path
+	 */
+	public function __construct()
+	{
+		$this->disk=config('filesystems.disks.local.root').'/';
+	}
 
 	/**
 	 * Display a listing of the resource.
@@ -36,14 +41,13 @@ class FileController extends Controller {
 
 	private function get_filename()
 	{
-		$fileNames = array_diff(scandir($this->dir), ['.', '..']);
+		$fileNames = array_diff(scandir($this->disk), ['.', '..']);
 		$i = 0;
 		foreach ($fileNames as $fullName)
 		{
-//			echo $fullName . '<br>';
 			$pathinfo = pathinfo($fullName);
 			$this->files[$i]['name'] = $pathinfo['filename'];
-			if (!is_dir($this->dir.$fullName))
+			if (!is_dir($this->disk.$fullName))
 			{
 				$this->files[$i]['ext'] = '.' . $pathinfo['extension'];
 			} else {
@@ -55,6 +59,10 @@ class FileController extends Controller {
 
 	}
 
+	/**
+	 * count file
+	 * @return int
+	 */
 	private function count_files()
 	{
 		return $this->fileNum = count($this->files);
@@ -64,8 +72,17 @@ class FileController extends Controller {
 	{
 		for ($i = 0; $i < $this->count_files(); $i++)
 		{
-			$this->files[$i]['size'] = $this->size(filesize($this->dir.$this->files[$i]['name'].$this->files[$i]['ext']));
+			$size = filesize($this->disk.$this->files[$i]['name'].$this->files[$i]['ext']);
+			$this->files[$i]['size'] = human_size($size);
 		}
+	}
+	
+	public function upload(Request $request)
+	{
+		$file = $request->file('file');
+		$fileName = $file->getClientOriginalName();
+		$file->move($this->disk, $fileName);
+		return redirect()->back();
 	}
 
 	/**
@@ -76,9 +93,9 @@ class FileController extends Controller {
 	public function make_dir(Requests\MakeFolderRequest $request)
 	{
 		$input = $request->all();
-		if (!is_dir($input['folderName']))
+		if (!is_dir($this->disk.$input['folderName']))
 		{
-			mkdir($this->dir.$input['folderName'], $mode = 0777);
+			mkdir($this->disk.$input['folderName'], $mode = 0777);
 		}
 		return redirect()->back();
 	}
@@ -91,7 +108,7 @@ class FileController extends Controller {
 	public function delete_file(Request $request)
 	{
 		$input = $request->all();
-		$file = $this->dir.$input['fileName'];
+		$file = $this->disk.$input['fileName'];
 		if (is_dir($file))
 		{
 			rmdir($file);
@@ -104,27 +121,7 @@ class FileController extends Controller {
 
 		return redirect()->back();
 	}
-
-	/**
-	 * show size better
-	 *
-	 * @param $bytes
-	 * @param int $decimals
-	 * @return string
-	 */
-	private function size($bytes, $decimals = 2)
-	{
-		$size = $bytes;
-		$unit = ['Byte', 'KB', 'MB', 'GB'];
-		$i = 0;
-		while($size > 1024)
-		{
-			$size = $size / 1024;
-			$i++;
-		}
-		$size = round($size, 2);
-		return $size . $unit[$i];
-	}
+	
 
 	private function dir_size()
 	{

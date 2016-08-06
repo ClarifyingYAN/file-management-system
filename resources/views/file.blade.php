@@ -4,7 +4,10 @@
 	<div class="panel-heading">
 		<span class="panel-left-name">File</span>
 		<span class="panel-left-btns">
-
+			{!! Form::open(['action'=>'FileController@upload', 'files'=>true, 'class'=>'form']) !!}
+				{!! Form::file('file') !!}}
+				{!! Form::submit('upload', ['class'=>'btns']) !!}
+			{!! Form::close() !!}
 			{!! Form::open(['action'=>'FileController@make_dir', 'class'=>'form']) !!}
 				{!! Form::text('folderName') !!}
 				{!! Form::submit('New Folder', ['class'=>'btns']) !!}
