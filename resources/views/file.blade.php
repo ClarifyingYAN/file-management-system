@@ -5,10 +5,10 @@
 		<span class="panel-left-name">File</span>
 		<span class="panel-left-btns">
 			{!! Form::open(['action'=>'FileController@upload', 'files'=>true, 'class'=>'form']) !!}
-				{!! Form::file('file') !!}}
+				{!! Form::file('file') !!}
 				{!! Form::submit('upload', ['class'=>'btns']) !!}
 			{!! Form::close() !!}
-			{!! Form::open(['action'=>'FileController@make_dir', 'class'=>'form']) !!}
+			{!! Form::open(['action'=>'FileController@make_folder', 'class'=>'form']) !!}
 				{!! Form::text('folderName') !!}
 				{!! Form::submit('New Folder', ['class'=>'btns']) !!}
 			{!! Form::close() !!}
@@ -26,21 +26,33 @@
 			<th>type</th>
 			<th>operate</th>
 			</thead>
-			@foreach($files as $key => $file)
+			@foreach($dir['files'] as $key => $file)
 				<tr>
 					<td>{{ $key }}</td>
-					<td>{{ $file['name'] . $file['ext'] }}</td>
-					<td>{{ $file['size'] }}</td>
+					<td>{{ $file['name'] }}</td>
+					<td>{{ human_size($file['size']) }}</td>
 					<td>
-						@if( $file['ext'] != '')
-							{{ 'file' }}
-						@else
-							{{ 'dir' }}
-						@endif
+						{{ $file['type'] }}
 					</td>
 					<td>
-						{!! Form::open(['action'=>'FileController@delete_file', 'class'=>'form']) !!}
-							{!! Form::hidden('fileName', $file['name'].$file['ext']) !!}
+						{!! Form::open(['url'=>'/file/deleteFile', 'method'=>'delete','class'=>'form']) !!}
+							{!! Form::hidden('fileName', $file['name']) !!}
+							{!! Form::submit('Del', ['class'=>'btns']) !!}
+						{!! Form::close() !!}
+					</td>
+				</tr>
+			@endforeach
+			@foreach($dir['folders'] as $key => $folder)
+				<tr>
+					<td>{{ $key }}</td>
+					<td>{{ $folder['name'] }}</td>
+					<td>{{ human_size($folder['size']) }}</td>
+					<td>
+						{{ 'dir' }}
+					</td>
+					<td>
+						{!! Form::open(['url'=>'/file/deleteFolder', 'method'=>'delete','class'=>'form']) !!}
+							{!! Form::hidden('folderName', $folder['name']) !!}
 							{!! Form::submit('Del', ['class'=>'btns']) !!}
 						{!! Form::close() !!}
 					</td>

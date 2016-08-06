@@ -17,9 +17,15 @@ Route::get('home', 'HomeController@index');
 
 Route::get('file', 'FileController@index');
 Route::get('setting', 'SettingsController@index');
-Route::post('file', 'FileController@make_dir');
-Route::post('/file/del', 'FileController@delete_file');
+
+Route::post('file', 'FileController@make_folder');
+Route::delete('/file/deleteFolder', 'FileController@delete_folder');
+
+Route::delete('/file/deleteFile', 'FileController@delete_file');
+
 Route::post('/file/upload', 'FileController@upload');
+
+//Route::get('test', 'FileController@fill_dir_info');
 
 Route::controllers([
 	'auth' => 'Auth\AuthController',

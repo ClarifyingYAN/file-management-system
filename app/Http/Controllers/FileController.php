@@ -5,27 +5,24 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Illuminate\Filesystem\Filesystem;
 
 class FileController extends Controller {
 
-	protected $disk = '';
-	protected $files = [];
-	protected $name = [];
-	protected $size = [];
-	protected $ext = [];
-	protected $dirkTotalSize = 0;
-	protected $dirkUsedSize = 0;
-	protected $dirkFreeSize = 0;
-	protected $fileNum = 0;
+	protected $disk;
+	protected $dir;
+	protected $shortPath;
 
 	/**
 	 * FileController constructor.
 	 * initial disk path
+	 *
 	 */
-	public function __construct()
+	public function __construct ($folder = null)
 	{
 		$this->disk=config('filesystems.disks.local.root').'/';
+		$this->get_short_path($folder);
+		$this->dir = $this->fill_dir_info($folder);
 	}
 
 	/**
@@ -35,53 +32,89 @@ class FileController extends Controller {
 	 */
 	public function index()
 	{
-		$this->get_filename();
-		return view('file')->with('files', $this->files);
+		return view('file')->with('dir', $this->dir);
 	}
 
-	private function get_filename()
+	private function fill_dir_info ($folder = null)
 	{
-		$fileNames = array_diff(scandir($this->disk), ['.', '..']);
-		$i = 0;
-		foreach ($fileNames as $fullName)
+		$path = $this->disk . $this->current_path($folder);
+		$folders = $this->folders_info($folder);
+		$files = $this->files_info($folder);
+		return compact('path', 'folders', 'files');
+	}
+
+	private function current_path ($folder)
+	{
+		$path = '';
+		if ($folder == null)
 		{
-			$pathinfo = pathinfo($fullName);
-			$this->files[$i]['name'] = $pathinfo['filename'];
-			if (!is_dir($this->disk.$fullName))
-			{
-				$this->files[$i]['ext'] = '.' . $pathinfo['extension'];
-			} else {
-				$this->files[$i]['ext'] = '';
-			}
-			$i++;
+			return $path;
+		} else {
+			$path .= $folder . '/';
+			return $path;
 		}
-		$this->file_size();
-
 	}
 
-	/**
-	 * count file
-	 * @return int
-	 */
-	private function count_files()
+	private function get_short_path ($folder)
 	{
-		return $this->fileNum = count($this->files);
+		return $this->shortPath = $this->current_path($folder);
 	}
 
-	private function file_size()
+	private function files_info ($folder)
 	{
-		for ($i = 0; $i < $this->count_files(); $i++)
+		$files = Storage::files($folder);
+		$num = count($files);
+		$arr = [];
+		for ($i = 0; $i < $num; $i++)
 		{
-			$size = filesize($this->disk.$this->files[$i]['name'].$this->files[$i]['ext']);
-			$this->files[$i]['size'] = human_size($size);
+			$arr[$i]['name'] = $files[$i];
+			$arr[$i]['size'] = Storage::size($arr[$i]['name']);
+			$path = $this->current_path($folder) . '/' . $files[$i];
+			$arr[$i]['type'] = \File::extension($path);
 		}
+		return $arr;
+
+	}
+
+	private function folders_info ($folder)
+	{
+		// 获取目录下的文件夹
+		$folders = Storage::directories($folder);
+		// 获取文件夹数目
+		$num = count($folders);
+		$arr = [];
+		// 存取目录信息
+		for ($i = 0; $i < $num; $i++)
+		{
+			$arr[$i]['name'] = $folders[$i];
+			$arr[$i]['size'] = $this->folder_size($arr[$i]['name']);
+		}
+		return $arr;
+	}
+
+	private function folder_size ($folder)
+	{
+		// 获取目录下的所有文件
+		$files = Storage::allFiles($folder);
+		// 初始化size大小
+		$size = 0;
+		// 计算目录总大小
+		foreach ($files as $file)
+		{
+			$size += Storage::size($file);
+		}
+		return $size;
 	}
 	
-	public function upload(Request $request)
+	public function upload (Request $request)
 	{
+		// 获取上传文件信息
 		$file = $request->file('file');
+		// 获取原始文件名
 		$fileName = $file->getClientOriginalName();
+		// 移动文件到当前目录
 		$file->move($this->disk, $fileName);
+		
 		return redirect()->back();
 	}
 
@@ -90,13 +123,21 @@ class FileController extends Controller {
 	 * @param Requests\MakeFolderRequest $request
 	 * @return \Illuminate\Http\RedirectResponse
 	 */
-	public function make_dir(Requests\MakeFolderRequest $request)
+	public function make_folder (Requests\MakeFolderRequest $request)
 	{
+		// 获取文件夹名称
 		$input = $request->all();
-		if (!is_dir($this->disk.$input['folderName']))
+		$folderName = $input['folderName'];
+
+		// 得到短目录
+		$directory = $this->shortPath . $folderName;
+
+		// 判断同名文件夹是否存在
+		if (!Storage::exists($directory))
 		{
-			mkdir($this->disk.$input['folderName'], $mode = 0777);
+			Storage::makeDirectory($directory);
 		}
+
 		return redirect()->back();
 	}
 
@@ -105,27 +146,40 @@ class FileController extends Controller {
 	 * @param Request $request
 	 * @return \Illuminate\Http\RedirectResponse
 	 */
-	public function delete_file(Request $request)
+	public function delete_folder (Request $request)
 	{
+		// 获取文件夹名称
 		$input = $request->all();
-		$file = $this->disk.$input['fileName'];
-		if (is_dir($file))
+		$folderName = $input['folderName'];
+
+		// 得到短目录
+		$directory = $this->shortPath . $folderName;
+
+		// 判断同名文件夹是否存在
+		if (Storage::exists($directory))
 		{
-			rmdir($file);
-		} else {
-			if (file_exists($file))
-			{
-				unlink($file);
-			}
+			$directory = $this->disk . $directory;
+			\File::deleteDirectory($directory);
+		}
+
+		return redirect()->back ();
+	}
+
+	public function delete_file (Request $request)
+	{
+		// 获取文件名
+		$input = $request->all();
+		$fileName = $input['fileName'];
+
+		// 文件短目录
+		$file = $this->shortPath . $fileName;
+
+		if (Storage::exists($file))
+		{
+			Storage::delete($file);
 		}
 
 		return redirect()->back();
-	}
-	
-
-	private function dir_size()
-	{
-
 	}
 
 }
