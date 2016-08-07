@@ -9,44 +9,121 @@ use Illuminate\Filesystem\Filesystem;
 
 class FileController extends Controller {
 
+	// root path.
 	protected $disk;
+
+	// current dir's information.
 	protected $dir;
+
+	// current short path.
 	protected $shortPath;
 
 	/**
 	 * FileController constructor.
-	 * initial disk path
 	 *
+	 * @param string $folder
 	 */
-	public function __construct ($folder = null)
+	public function __construct ($folder = '')
 	{
+		// set root path.
 		$this->disk=config('filesystems.disks.local.root').'/';
+
+		// set short path.
 		$this->get_short_path($folder);
+
+		// fill dir's information.
 		$this->dir = $this->fill_dir_info($folder);
 	}
 
 	/**
-	 * Display a listing of the resource.
+	 * show file list.
 	 *
-	 * @return Response
+	 * @return \Illuminate\View\View
 	 */
 	public function index()
 	{
 		return view('file')->with('dir', $this->dir);
 	}
 
-	private function fill_dir_info ($folder = null)
+	/**
+	 * fill dir's information.
+	 *
+	 * @param mixed $folder
+	 * @return array
+	 */
+	private function fill_dir_info ($folder)
 	{
 		$path = $this->disk . $this->current_path($folder);
 		$folders = $this->folders_info($folder);
 		$files = $this->files_info($folder);
+
+		// return a all information together in an array.
 		return compact('path', 'folders', 'files');
 	}
 
+	/**
+	 * get files' information.
+	 *
+	 * @param string $folder folder's name
+	 * @return array
+	 */
+	private function files_info ($folder)
+	{
+		// get all files.
+		$files = Storage::files($folder);
+
+		// count files.
+		$num = count($files);
+		$arr = [];
+
+		// set files information.
+		for ($i = 0; $i < $num; $i++)
+		{
+			$arr[$i]['name'] = $files[$i];
+			$arr[$i]['size'] = Storage::size($arr[$i]['name']);
+			$path = $this->current_path($folder) . '/' . $files[$i];
+			$arr[$i]['type'] = \File::extension($path);
+		}
+
+		return $arr;
+	}
+
+	/**
+	 * get folders' information.
+	 *
+	 * @param $folder
+	 * @return array
+	 */
+	private function folders_info ($folder)
+	{
+		// get all folders.
+		$folders = Storage::directories($folder);
+
+		// count folders.
+		$num = count($folders);
+		$arr = [];
+
+		// set folders information.
+		for ($i = 0; $i < $num; $i++)
+		{
+			$arr[$i]['name'] = $folders[$i];
+			$arr[$i]['size'] = $this->folder_size($arr[$i]['name']);
+		}
+
+		return $arr;
+	}
+
+	/**
+	 * get current short path.
+	 *
+	 * @param $folder
+	 * @return string
+	 */
 	private function current_path ($folder)
 	{
 		$path = '';
-		if ($folder == null)
+
+		if ($folder == '')
 		{
 			return $path;
 		} else {
@@ -55,84 +132,77 @@ class FileController extends Controller {
 		}
 	}
 
+	/**
+	 * get short path.
+	 *
+	 * @param  string $folder
+	 * @return string
+	 */
 	private function get_short_path ($folder)
 	{
 		return $this->shortPath = $this->current_path($folder);
 	}
 
-	private function files_info ($folder)
-	{
-		$files = Storage::files($folder);
-		$num = count($files);
-		$arr = [];
-		for ($i = 0; $i < $num; $i++)
-		{
-			$arr[$i]['name'] = $files[$i];
-			$arr[$i]['size'] = Storage::size($arr[$i]['name']);
-			$path = $this->current_path($folder) . '/' . $files[$i];
-			$arr[$i]['type'] = \File::extension($path);
-		}
-		return $arr;
-
-	}
-
-	private function folders_info ($folder)
-	{
-		// 获取目录下的文件夹
-		$folders = Storage::directories($folder);
-		// 获取文件夹数目
-		$num = count($folders);
-		$arr = [];
-		// 存取目录信息
-		for ($i = 0; $i < $num; $i++)
-		{
-			$arr[$i]['name'] = $folders[$i];
-			$arr[$i]['size'] = $this->folder_size($arr[$i]['name']);
-		}
-		return $arr;
-	}
-
+	/**
+	 * get folder's size
+	 *
+	 * @param string $folder
+	 * @return int
+	 */
 	private function folder_size ($folder)
 	{
-		// 获取目录下的所有文件
+		// get all files.
+		// Recursive.
 		$files = Storage::allFiles($folder);
-		// 初始化size大小
+
+		// initial size.
 		$size = 0;
-		// 计算目录总大小
+		
+		// get folder size.
 		foreach ($files as $file)
 		{
 			$size += Storage::size($file);
 		}
+
 		return $size;
 	}
-	
+
+	/**
+	 * upload file.
+	 *
+	 * @param Request $request
+	 * @return \Illuminate\Http\RedirectResponse
+	 */
 	public function upload (Request $request)
 	{
-		// 获取上传文件信息
+		// get upload file's information.
 		$file = $request->file('file');
-		// 获取原始文件名
+
+		// get file's original name.
 		$fileName = $file->getClientOriginalName();
-		// 移动文件到当前目录
+
+		// move file.
 		$file->move($this->disk, $fileName);
-		
+
 		return redirect()->back();
 	}
 
 	/**
 	 * make new folder
+	 *
 	 * @param Requests\MakeFolderRequest $request
 	 * @return \Illuminate\Http\RedirectResponse
 	 */
 	public function make_folder (Requests\MakeFolderRequest $request)
 	{
-		// 获取文件夹名称
+		// get folder's name
 		$input = $request->all();
 		$folderName = $input['folderName'];
 
-		// 得到短目录
+		// get short path
 		$directory = $this->shortPath . $folderName;
 
-		// 判断同名文件夹是否存在
+		// if the folder not exists, then make the folder.
 		if (!Storage::exists($directory))
 		{
 			Storage::makeDirectory($directory);
@@ -142,20 +212,21 @@ class FileController extends Controller {
 	}
 
 	/**
-	 * delete file
+	 * delete folder
+	 *
 	 * @param Request $request
 	 * @return \Illuminate\Http\RedirectResponse
 	 */
 	public function delete_folder (Request $request)
 	{
-		// 获取文件夹名称
+		// get folder's name.
 		$input = $request->all();
 		$folderName = $input['folderName'];
 
-		// 得到短目录
+		// get short path.
 		$directory = $this->shortPath . $folderName;
 
-		// 判断同名文件夹是否存在
+		// if the file exists, then delete the folder.
 		if (Storage::exists($directory))
 		{
 			$directory = $this->disk . $directory;
@@ -165,15 +236,22 @@ class FileController extends Controller {
 		return redirect()->back ();
 	}
 
+	/**
+	 * delete file / folder
+	 *
+	 * @param Request $request get upload file info
+	 * @return \Illuminate\Http\RedirectResponse
+	 */
 	public function delete_file (Request $request)
 	{
-		// 获取文件名
+		// get file's / folder's name.
 		$input = $request->all();
 		$fileName = $input['fileName'];
 
-		// 文件短目录
+		// get file's short path.
 		$file = $this->shortPath . $fileName;
 
+		// if the file / folder exists, then delete the file.
 		if (Storage::exists($file))
 		{
 			Storage::delete($file);
