@@ -15,34 +15,59 @@ class FileController extends Controller {
 	// current dir's information.
 	protected $dir;
 
+	// current folder.
+	protected $folder;
+
 	// current short path.
 	protected $shortPath;
 
 	/**
 	 * FileController constructor.
 	 *
-	 * @param string $folder
+	 * return void
 	 */
-	public function __construct ($folder = '')
+	public function __construct ()
 	{
+//		parent::__construct();
 		// set root path.
 		$this->disk=config('filesystems.disks.local.root').'/';
-
-		// set short path.
-		$this->get_short_path($folder);
-
-		// fill dir's information.
-		$this->dir = $this->fill_dir_info($folder);
 	}
 
 	/**
+	 * initial path info,
 	 * show file list.
 	 *
-	 * @return \Illuminate\View\View
+	 * @param Request $request
+	 * @return $this
 	 */
-	public function index()
+	public function index(Request $request)
 	{
+		// set current folder.
+		$input = $request->all();
+		$this->set_current_folder($input);
+
+		// set short path.
+		$this->get_short_path($this->folder);
+
+		// fill dir's information.
+		$this->dir = $this->fill_dir_info($this->folder);
+
 		return view('file')->with('dir', $this->dir);
+	}
+
+	/**
+	 * set current folder's path
+	 *
+	 * @param $input
+	 * @return string
+	 */
+	private function set_current_folder($input)
+	{
+		if (!array_key_exists('folder', $input))
+		{
+			$input['folder'] = '';
+		}
+		return $this->folder = $input['folder'];
 	}
 
 	/**
@@ -79,8 +104,10 @@ class FileController extends Controller {
 		// set files information.
 		for ($i = 0; $i < $num; $i++)
 		{
-			$arr[$i]['name'] = $files[$i];
-			$arr[$i]['size'] = Storage::size($arr[$i]['name']);
+			// get file's name and trim the short path.
+			$arr[$i]['name'] = str_replace($this->shortPath, '', $files[$i]);
+			$arr[$i]['pathName'] = $files[$i];
+			$arr[$i]['size'] = Storage::size($files[$i]);
 			$path = $this->current_path($folder) . '/' . $files[$i];
 			$arr[$i]['type'] = \File::extension($path);
 		}
@@ -106,8 +133,10 @@ class FileController extends Controller {
 		// set folders information.
 		for ($i = 0; $i < $num; $i++)
 		{
-			$arr[$i]['name'] = $folders[$i];
-			$arr[$i]['size'] = $this->folder_size($arr[$i]['name']);
+			// get the folder's name and trim the short path.
+			$arr[$i]['name'] = str_replace($this->shortPath, '', $folders[$i]);
+			$arr[$i]['pathName'] = $folders[$i];
+			$arr[$i]['size'] = $this->folder_size($folders[$i]);
 		}
 
 		return $arr;
@@ -224,7 +253,7 @@ class FileController extends Controller {
 		$folderName = $input['folderName'];
 
 		// get short path.
-		$directory = $this->shortPath . $folderName;
+		$directory = $folderName;
 
 		// if the file exists, then delete the folder.
 		if (Storage::exists($directory))
@@ -244,19 +273,18 @@ class FileController extends Controller {
 	 */
 	public function delete_file (Request $request)
 	{
-		// get file's / folder's name.
+		// get file's name.
 		$input = $request->all();
 		$fileName = $input['fileName'];
 
 		// get file's short path.
-		$file = $this->shortPath . $fileName;
+		$file = $fileName;
 
-		// if the file / folder exists, then delete the file.
+		// if the file exists, then delete the file.
 		if (Storage::exists($file))
 		{
 			Storage::delete($file);
 		}
-
 		return redirect()->back();
 	}
 

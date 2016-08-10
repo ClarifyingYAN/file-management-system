@@ -36,7 +36,7 @@
 					</td>
 					<td>
 						{!! Form::open(['url'=>'/file/deleteFile', 'method'=>'delete','class'=>'form']) !!}
-							{!! Form::hidden('fileName', $file['name']) !!}
+							{!! Form::hidden('fileName', $file['pathName']) !!}
 							{!! Form::submit('Del', ['class'=>'btns']) !!}
 						{!! Form::close() !!}
 					</td>
@@ -45,14 +45,14 @@
 			@foreach($dir['folders'] as $key => $folder)
 				<tr>
 					<td>{{ $key }}</td>
-					<td>{{ $folder['name'] }}</td>
+					<td><a href="{{ URL::action('FileController@index', ['folder' => $folder['name']]) }}">{{ $folder['name'] }}</a></td>
 					<td>{{ human_size($folder['size']) }}</td>
 					<td>
 						{{ 'dir' }}
 					</td>
 					<td>
 						{!! Form::open(['url'=>'/file/deleteFolder', 'method'=>'delete','class'=>'form']) !!}
-							{!! Form::hidden('folderName', $folder['name']) !!}
+							{!! Form::hidden('folderName', $folder['pathName']) !!}
 							{!! Form::submit('Del', ['class'=>'btns']) !!}
 						{!! Form::close() !!}
 					</td>
