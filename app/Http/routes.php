@@ -18,7 +18,7 @@ Route::get('home', 'HomeController@index');
 Route::get('file', 'FileController@index');
 Route::get('setting', 'SettingsController@index');
 
-Route::post('file', 'FileController@make_folder');
+Route::post('/file/makeFolder', 'FileController@make_folder');
 Route::delete('/file/deleteFolder', 'FileController@delete_folder');
 
 Route::delete('/file/deleteFile', 'FileController@delete_file');

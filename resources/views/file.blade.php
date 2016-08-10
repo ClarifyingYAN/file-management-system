@@ -32,7 +32,11 @@
 					<td>{{ $file['name'] }}</td>
 					<td>{{ human_size($file['size']) }}</td>
 					<td>
-						{{ $file['type'] }}
+						@if($file['type'] == '')
+							{{ 'unknown' }}
+						@else
+							{{ $file['type'] }}
+						@endif
 					</td>
 					<td>
 						{!! Form::open(['url'=>'/file/deleteFile', 'method'=>'delete','class'=>'form']) !!}

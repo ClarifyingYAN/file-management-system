@@ -234,6 +234,7 @@ class FileController extends Controller {
 		// if the folder not exists, then make the folder.
 		if (!Storage::exists($directory))
 		{
+			echo $directory;
 			Storage::makeDirectory($directory);
 		}
 
