@@ -40,7 +40,7 @@ class FileController extends Controller {
 	 * @param Request $request
 	 * @return $this
 	 */
-	public function index(Request $request)
+	public function index (Request $request)
 	{
 		// set current folder.
 		$input = $request->all();
@@ -51,7 +51,7 @@ class FileController extends Controller {
 
 		// fill dir's information.
 		$this->dir = $this->fill_dir_info($this->folder);
-
+		
 		return view('file')->with('dir', $this->dir);
 	}
 
@@ -61,13 +61,33 @@ class FileController extends Controller {
 	 * @param $input
 	 * @return string
 	 */
-	private function set_current_folder($input)
+	private function set_current_folder ($input)
 	{
 		if (!array_key_exists('folder', $input))
 		{
 			$input['folder'] = '';
 		}
+
 		return $this->folder = $input['folder'];
+	}
+
+	/**
+	 * get current short path.
+	 *
+	 * @param $folder
+	 * @return string
+	 */
+	private function current_path ($folder)
+	{
+		$path = '';
+
+		if ($folder == '')
+		{
+			return $path;
+		} else {
+			$path .= $folder . '/';
+			return $path;
+		}
 	}
 
 	/**
@@ -81,9 +101,9 @@ class FileController extends Controller {
 		$path = $this->disk . $this->current_path($folder);
 		$folders = $this->folders_info($folder);
 		$files = $this->files_info($folder);
-
+		$shortPath = $this->shortPath;
 		// return a all information together in an array.
-		return compact('path', 'folders', 'files');
+		return compact('path', 'shortPath', 'folders', 'files');
 	}
 
 	/**
@@ -140,25 +160,6 @@ class FileController extends Controller {
 		}
 
 		return $arr;
-	}
-
-	/**
-	 * get current short path.
-	 *
-	 * @param $folder
-	 * @return string
-	 */
-	private function current_path ($folder)
-	{
-		$path = '';
-
-		if ($folder == '')
-		{
-			return $path;
-		} else {
-			$path .= $folder . '/';
-			return $path;
-		}
 	}
 
 	/**
@@ -226,19 +227,17 @@ class FileController extends Controller {
 	{
 		// get folder's name
 		$input = $request->all();
-		$folderName = $input['folderName'];
 
 		// get short path
-		$directory = $this->shortPath . $folderName;
+		$directory = $input['shortPath'] . $input['folderName'];
 
 		// if the folder not exists, then make the folder.
 		if (!Storage::exists($directory))
 		{
-			echo $directory;
 			Storage::makeDirectory($directory);
 		}
 
-		return redirect()->back();
+//		return redirect()->back();
 	}
 
 	/**
@@ -286,6 +285,20 @@ class FileController extends Controller {
 		{
 			Storage::delete($file);
 		}
+		return redirect()->back();
+	}
+
+	public function download (Request $request)
+	{
+		$input = $request->all();
+		$pathName = $input['pathName'];
+
+		if (Storage::exists($pathName))
+		{
+			$path = $this->disk . $pathName;
+			return response()->download($path);
+		}
+
 		return redirect()->back();
 	}
 

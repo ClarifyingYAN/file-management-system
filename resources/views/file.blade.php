@@ -10,6 +10,7 @@
 			{!! Form::close() !!}
 			{!! Form::open(['action'=>'FileController@make_folder', 'class'=>'form']) !!}
 				{!! Form::text('folderName') !!}
+				{!! Form::hidden('shortPath', $dir['shortPath']) !!}
 				{!! Form::submit('New Folder', ['class'=>'btns']) !!}
 			{!! Form::close() !!}
 		</span>
@@ -43,13 +44,18 @@
 							{!! Form::hidden('fileName', $file['pathName']) !!}
 							{!! Form::submit('Del', ['class'=>'btns']) !!}
 						{!! Form::close() !!}
+						{!! Form::open(['url'=>'/file/download', 'method'=>'post', 'class'=>'form']) !!}
+							{!! Form::hidden('pathName', $file['pathName']) !!}
+							{!! Form::submit('Download', ['class'=>'btns']) !!}
+						{!! Form::close() !!}
+{{--						<a href="{{ URL::action('FileController@download', ['pathName'=>$file['pathName']]) }}">download</a>--}}
 					</td>
 				</tr>
 			@endforeach
 			@foreach($dir['folders'] as $key => $folder)
 				<tr>
 					<td>{{ $key }}</td>
-					<td><a href="{{ URL::action('FileController@index', ['folder' => $folder['name']]) }}">{{ $folder['name'] }}</a></td>
+					<td><a href="{{ URL::action('FileController@index', ['folder'=>$folder['pathName']]) }}">{{ $folder['name'] }}</a></td>
 					<td>{{ human_size($folder['size']) }}</td>
 					<td>
 						{{ 'dir' }}
@@ -59,6 +65,7 @@
 							{!! Form::hidden('folderName', $folder['pathName']) !!}
 							{!! Form::submit('Del', ['class'=>'btns']) !!}
 						{!! Form::close() !!}
+						<a href="{{ URL::action('FileController@download', ['pathName'=>$folder['pathName']]) }}">download</a>
 					</td>
 				</tr>
 			@endforeach

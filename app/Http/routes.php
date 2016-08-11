@@ -25,7 +25,9 @@ Route::delete('/file/deleteFile', 'FileController@delete_file');
 
 Route::post('/file/upload', 'FileController@upload');
 
-//Route::get('test', 'FileController@fill_dir_info');
+//Route::get('test', 'FileController@download');
+Route::post('/file/download', 'FileController@download');
+
 
 Route::controllers([
 	'auth' => 'Auth\AuthController',
