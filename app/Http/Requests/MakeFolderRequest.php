@@ -22,7 +22,7 @@ class MakeFolderRequest extends Request {
 	public function rules()
 	{
 		return [
-			'folderName' => ['required']
+			'folderName' => 'required|max:255|alpha_dash',
 		];
 	}
 
