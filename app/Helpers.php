@@ -9,7 +9,7 @@
  */
 if (!function_exists('human_size'))
 {
-    function human_size($bytes, $decimals = 2)
+    function humanSize($bytes, $decimals = 2)
     {
         $size = $bytes;
         $unit = ['Byte', 'KB', 'MB', 'GB'];

@@ -9,7 +9,7 @@
 				{!! Form::hidden('shortPath', $dir['shortPath']) !!}
 				{!! Form::submit('upload', ['class'=>'btns']) !!}
 			{!! Form::close() !!}
-			{!! Form::open(['action'=>'FileController@make_folder', 'class'=>'form']) !!}
+			{!! Form::open(['action'=>'FileController@makeFolder', 'class'=>'form']) !!}
 				{!! Form::text('folderName') !!}
 				{!! Form::hidden('shortPath', $dir['shortPath']) !!}
 				{!! Form::submit('New Folder', ['class'=>'btns']) !!}
@@ -32,7 +32,7 @@
 				<tr>
 					<td>{{ $key }}</td>
 					<td>{{ $file['name'] }}</td>
-					<td>{{ human_size($file['size']) }}</td>
+					<td>{{ humanSize($file['size']) }}</td>
 					<td>
 						@if($file['type'] == '')
 							{{ 'unknown' }}
@@ -57,7 +57,7 @@
 				<tr>
 					<td>{{ $key }}</td>
 					<td><a href="{{ URL::action('FileController@index', ['folder'=>$folder['pathName']]) }}">{{ $folder['name'] }}</a></td>
-					<td>{{ human_size($folder['size']) }}</td>
+					<td>{{ humanSize($folder['size']) }}</td>
 					<td>
 						{{ 'dir' }}
 					</td>

@@ -2,7 +2,6 @@
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Storage;
 
 use Illuminate\Http\Request;
@@ -51,13 +50,13 @@ class FileController extends Controller {
 	{
 		// set current folder.
 		$input = $request->all();
-		$this->set_current_folder($input);
+		$this->setCurrentFolder($input);
 
 		// set short path.
-		$this->get_short_path($this->folder);
+		$this->getShortPath($this->folder);
 
 		// fill dir's information.
-		$this->dir = $this->fill_dir_info($this->folder);
+		$this->dir = $this->fillDirInfo($this->folder);
 		
 		return view('file')->with('dir', $this->dir);
 	}
@@ -68,7 +67,7 @@ class FileController extends Controller {
 	 * @param $input
 	 * @return string
 	 */
-	private function set_current_folder ($input)
+	private function setCurrentFolder ($input)
 	{
 		if (!array_key_exists('folder', $input))
 		{
@@ -84,7 +83,7 @@ class FileController extends Controller {
 	 * @param $folder
 	 * @return string
 	 */
-	private function current_path ($folder)
+	private function currentPath ($folder)
 	{
 		$path = '';
 
@@ -103,11 +102,11 @@ class FileController extends Controller {
 	 * @param mixed $folder
 	 * @return array
 	 */
-	private function fill_dir_info ($folder)
+	private function fillDirInfo ($folder)
 	{
-		$path = $this->disk . $this->current_path($folder);
-		$folders = $this->folders_info($folder);
-		$files = $this->files_info($folder);
+		$path = $this->disk . $this->currentPath($folder);
+		$folders = $this->foldersInfo($folder);
+		$files = $this->filesInfo($folder);
 		$shortPath = $this->shortPath;
 		// return a all information together in an array.
 		return compact('path', 'shortPath', 'folders', 'files');
@@ -119,7 +118,7 @@ class FileController extends Controller {
 	 * @param string $folder folder's name
 	 * @return array
 	 */
-	private function files_info ($folder)
+	private function filesInfo ($folder)
 	{
 		// get all files.
 		$files = Storage::files($folder);
@@ -135,7 +134,7 @@ class FileController extends Controller {
 			$arr[$i]['name'] = str_replace($this->shortPath, '', $files[$i]);
 			$arr[$i]['pathName'] = $files[$i];
 			$arr[$i]['size'] = Storage::size($files[$i]);
-			$path = $this->current_path($folder) . '/' . $files[$i];
+			$path = $this->currentPath($folder) . '/' . $files[$i];
 			$arr[$i]['type'] = \File::extension($path);
 		}
 
@@ -148,7 +147,7 @@ class FileController extends Controller {
 	 * @param $folder
 	 * @return array
 	 */
-	private function folders_info ($folder)
+	private function foldersInfo ($folder)
 	{
 		// get all folders.
 		$folders = Storage::directories($folder);
@@ -163,7 +162,7 @@ class FileController extends Controller {
 			// get the folder's name and trim the short path.
 			$arr[$i]['name'] = str_replace($this->shortPath, '', $folders[$i]);
 			$arr[$i]['pathName'] = $folders[$i];
-			$arr[$i]['size'] = $this->folder_size($folders[$i]);
+			$arr[$i]['size'] = $this->folderSize($folders[$i]);
 		}
 
 		return $arr;
@@ -175,9 +174,9 @@ class FileController extends Controller {
 	 * @param  string $folder
 	 * @return string
 	 */
-	private function get_short_path ($folder)
+	private function getShortPath ($folder)
 	{
-		return $this->shortPath = $this->current_path($folder);
+		return $this->shortPath = $this->currentPath($folder);
 	}
 
 	/**
@@ -186,7 +185,7 @@ class FileController extends Controller {
 	 * @param string $folder
 	 * @return int
 	 */
-	private function folder_size ($folder)
+	private function folderSize ($folder)
 	{
 		// get all files.
 		// Recursive.
@@ -245,7 +244,7 @@ class FileController extends Controller {
 	 * @param Requests\MakeFolderRequest $request
 	 * @return \Illuminate\Http\RedirectResponse
 	 */
-	public function make_folder (Requests\MakeFolderRequest $request)
+	public function makeFolder (Requests\MakeFolderRequest $request)
 	{
 		// get folder's name
 		$input = $request->all();
@@ -268,7 +267,7 @@ class FileController extends Controller {
 	 * @param Request $request
 	 * @return \Illuminate\Http\RedirectResponse
 	 */
-	public function delete_folder (Request $request)
+	public function deleteFolder (Request $request)
 	{
 		// get folder's name.
 		$input = $request->all();
@@ -293,7 +292,7 @@ class FileController extends Controller {
 	 * @param Request $request get upload file info
 	 * @return \Illuminate\Http\RedirectResponse
 	 */
-	public function delete_file (Request $request)
+	public function deleteFile (Request $request)
 	{
 		// get file's name.
 		$input = $request->all();

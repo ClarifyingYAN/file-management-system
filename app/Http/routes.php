@@ -18,10 +18,10 @@ Route::get('home', 'HomeController@index');
 Route::get('file', 'FileController@index');
 Route::get('setting', 'SettingsController@index');
 
-Route::post('/file/makeFolder', 'FileController@make_folder');
-Route::delete('/file/deleteFolder', 'FileController@delete_folder');
+Route::post('/file/makeFolder', 'FileController@makeFolder');
+Route::delete('/file/deleteFolder', 'FileController@deleteFolder');
 
-Route::delete('/file/deleteFile', 'FileController@delete_file');
+Route::delete('/file/deleteFile', 'FileController@deleteFile');
 
 Route::post('/file/upload', 'FileController@upload');
 
