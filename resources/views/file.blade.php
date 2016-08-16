@@ -66,7 +66,7 @@
 							{!! Form::hidden('folderName', $folder['pathName']) !!}
 							{!! Form::submit('Del', ['class'=>'btns']) !!}
 						{!! Form::close() !!}
-						<a href="{{ URL::action('FileController@download', ['pathName'=>$folder['pathName']]) }}">download</a>
+						{{--<a href="{{ URL::action('FileController@download', ['pathName'=>$folder['pathName']]) }}">download</a>--}}
 					</td>
 				</tr>
 			@endforeach
