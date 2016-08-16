@@ -2,11 +2,18 @@
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Storage;
 
 use Illuminate\Http\Request;
 use Illuminate\Filesystem\Filesystem;
 
+/**
+ * file class
+ *
+ * Class FileController
+ * @package App\Http\Controllers
+ */
 class FileController extends Controller {
 
 	// root path.
@@ -208,11 +215,26 @@ class FileController extends Controller {
 		// get upload file's information.
 		$file = $request->file('file');
 
+		// if doesn't choose file return back.
+		if ($file == '')
+		{
+			return redirect()->back();
+		}
+
+		$input = $request->all();
+		$shortPath = $input['shortPath'];
+
 		// get file's original name.
 		$fileName = $file->getClientOriginalName();
 
+		// if have the same name file, return back.
+		if (Storage::exists($shortPath.$fileName))
+		{
+			return redirect()->back();
+		}
+
 		// move file.
-		$file->move($this->disk, $fileName);
+		$file->move($this->disk . $shortPath, $fileName);
 
 		return redirect()->back();
 	}
