@@ -1,7 +1,9 @@
+# init
 /vendor
 /node_modules
 .env
 
+# ide
 .idea
-/management
 
+_ide_helper.php
