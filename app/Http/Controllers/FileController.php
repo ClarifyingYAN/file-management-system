@@ -36,6 +36,7 @@ class FileController extends Controller {
 	{
 //		parent::__construct();
 		// set root path.
+		$this->middleware('auth');
 		$this->disk=config('filesystems.disks.local.root').'/';
 	}
 
@@ -258,7 +259,7 @@ class FileController extends Controller {
 			Storage::makeDirectory($directory);
 		}
 
-//		return redirect()->back();
+		return redirect()->back();
 	}
 
 	/**
