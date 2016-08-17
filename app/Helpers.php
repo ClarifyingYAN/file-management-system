@@ -44,3 +44,29 @@ if (!function_exists('splitShortPath'))
         return $arr;
     }
 }
+
+if (!function_exists('breadcrumbPath'))
+{
+    /**
+     * get breadcrumb action's short path;
+     * 
+     * @param $arr
+     * @param $num
+     * @return string
+     */
+    function breadcrumbPath($arr, $num)
+    {
+        // init
+        $str = '';
+        //
+        for ($i = 0; $i <= $num; $i++)
+        {
+            $str .= $arr[$i] . '/';
+        }
+
+        // trim left and right slash.
+        $str = trim($str, '/');
+
+        return $str;
+    }
+}
