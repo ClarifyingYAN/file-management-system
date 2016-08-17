@@ -22,7 +22,7 @@ class UploadFileRequest extends Request {
 	public function rules()
 	{
 		return [
-			'file'=>'max:8192',
+			'file'=>'required|max:8192',
 		];
 	}
 

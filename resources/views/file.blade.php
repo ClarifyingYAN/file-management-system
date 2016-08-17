@@ -35,6 +35,17 @@
 			@endfor
 		</ol>
 	</div>
+
+	@if($errors->any())
+		<!-- errors -->
+		<div class="errors">
+			<ul class="list-group">
+				@foreach($errors->all() as $error)
+					<li class="list-group-item list-group-item-danger">{{ $error }}</li>
+				@endforeach
+			</ul>
+		</div>
+	@endif
 	<!-- dir list -->
 	<div class="show-list">
 		<table class="bordered">
@@ -90,13 +101,5 @@
 			@endforeach
 		</table>
 	</div>
-@endsection
-{{--@section('errors')--}}
-	{{--@if($errors->any())--}}
-		{{--<ul class="list-group">--}}
-			{{--@foreach($errors->all() as $error)--}}
-				{{--<li class="list-group-item list-group-item-danger">{{ $error }}</li>--}}
-			{{--@endforeach--}}
-		{{--</ul>--}}
-	{{--@endif--}}
-{{--@endsection--}}
+@stop
+
