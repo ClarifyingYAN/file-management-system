@@ -105,12 +105,13 @@ class FileController extends Controller {
 	 */
 	private function fillDirInfo ($folder)
 	{
-		$path = $this->disk . $this->currentPath($folder);
 		$folders = $this->foldersInfo($folder);
 		$files = $this->filesInfo($folder);
 		$shortPath = $this->shortPath;
+		$shortPathArr = splitShortPath($shortPath);
+
 		// return a all information together in an array.
-		return compact('path', 'shortPath', 'folders', 'files');
+		return compact('shortPath', 'folders', 'files', 'shortPathArr');
 	}
 
 	/**
