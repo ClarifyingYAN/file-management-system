@@ -136,6 +136,7 @@ class FileController extends Controller {
 			$arr[$i]['name'] = str_replace($this->shortPath, '', $files[$i]);
 			$arr[$i]['pathName'] = $files[$i];
 			$arr[$i]['size'] = Storage::size($files[$i]);
+			$arr[$i]['lastModified'] = Storage::lastModified($files[$i]);
 			$path = $this->currentPath($folder) . '/' . $files[$i];
 			$arr[$i]['type'] = \File::extension($path);
 		}
@@ -164,6 +165,7 @@ class FileController extends Controller {
 			// get the folder's name and trim the short path.
 			$arr[$i]['name'] = str_replace($this->shortPath, '', $folders[$i]);
 			$arr[$i]['pathName'] = $folders[$i];
+			$arr[$i]['lastModified'] = Storage::lastModified($folders[$i]);
 			$arr[$i]['size'] = $this->folderSize($folders[$i]);
 		}
 

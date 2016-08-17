@@ -43,6 +43,7 @@
 			<th>file name</th>
 			<th>size</th>
 			<th>type</th>
+			<th>last modified time</th>
 			<th>operate</th>
 			</thead>
 			{{-- files list --}}
@@ -58,6 +59,7 @@
 							{{ $file['type'] }}
 						@endif
 					</td>
+					<td>{{ date('Y-m-d H:i:s', $file['lastModified']) }}</td>
 					<td>
 						{!! Form::open(['url'=>'/file/download', 'method'=>'post', 'class'=>'form']) !!}
 							{!! Form::hidden('pathName', $file['pathName']) !!}
@@ -77,6 +79,7 @@
 					<td><a href="{{ URL::action('FileController@index', ['folder'=>$folder['pathName']]) }}">{{ $folder['name'] }}</a></td>
 					<td>{{ humanSize($folder['size']) }}</td>
 					<td>dir</td>
+					<td>{{ date('Y-m-d H:i:s', $folder['lastModified']) }}</td>
 					<td>
 						{!! Form::open(['url'=>'/file/deleteFolder', 'method'=>'delete','class'=>'form']) !!}
 							{!! Form::hidden('folderName', $folder['pathName']) !!}
