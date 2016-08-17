@@ -2,6 +2,6 @@
     margin: 0;
     display: inline-block;
 }
-.panel-left-btns > .form {
+#upload-form {
     float: right;
 }
