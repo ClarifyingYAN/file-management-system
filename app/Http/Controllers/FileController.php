@@ -208,10 +208,10 @@ class FileController extends Controller {
 	/**
 	 * upload file.
 	 *
-	 * @param Request $request
+	 * @param Requests\UploadFileRequest $request
 	 * @return \Illuminate\Http\RedirectResponse
 	 */
-	public function upload (Request $request)
+	public function upload (Requests\UploadFileRequest $request)
 	{
 		// get upload file's information.
 		$file = $request->file('file');
@@ -311,6 +311,12 @@ class FileController extends Controller {
 		return redirect()->back();
 	}
 
+	/**
+	 * download
+	 *
+	 * @param Request $request
+	 * @return \Illuminate\Http\RedirectResponse|\Symfony\Component\HttpFoundation\BinaryFileResponse
+	 */
 	public function download (Request $request)
 	{
 		$input = $request->all();
