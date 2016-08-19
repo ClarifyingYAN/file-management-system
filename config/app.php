@@ -137,6 +137,7 @@ return [
 		'Illuminate\View\ViewServiceProvider',
 		'Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider',
 		'Illuminate\Html\HtmlServiceProvider',
+		'Zizaco\Entrust\EntrustServiceProvider',
 
 		/*
 		 * Application Service Providers...
@@ -195,6 +196,7 @@ return [
 		'Validator' => 'Illuminate\Support\Facades\Validator',
 		'View'      => 'Illuminate\Support\Facades\View',
 		'Form'		=> 'Illuminate\Html\FormFacade',
+		'Entrust' 	=> 'Zizaco\Entrust\EntrustFacade',
 
 	],
 
